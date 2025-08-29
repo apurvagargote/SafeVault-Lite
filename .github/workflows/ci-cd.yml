@@ -97,16 +97,28 @@ jobs:
         kind load docker-image ${{ env.BACKEND_IMAGE }}:${{ github.sha }} --name safevault
         kind load docker-image ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} --name safevault
     
+    - name: Create AWS credentials secret
+      run: |
+        kubectl create secret generic aws-credentials \
+          --from-literal=access-key-id=dummy \
+          --from-literal=secret-access-key=dummy
+    
     - name: Deploy to Kind cluster
       run: |
         kubectl apply -f k8s/deploy-all.yaml
         kubectl set image deployment/safevault-backend backend=${{ env.BACKEND_IMAGE }}:${{ github.sha }}
         kubectl set image deployment/safevault-frontend frontend=${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
     
+    - name: Debug deployment
+      run: |
+        kubectl get pods
+        kubectl describe pods
+        kubectl logs -l app=safevault-backend --tail=50 || true
+    
     - name: Wait for rollout
       run: |
-        kubectl rollout status deployment/safevault-backend --timeout=300s
-        kubectl rollout status deployment/safevault-frontend --timeout=300s
+        kubectl rollout status deployment/safevault-backend --timeout=180s
+        kubectl rollout status deployment/safevault-frontend --timeout=180s
     
     - name: Verify deployment
       run: |
