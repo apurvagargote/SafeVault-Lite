@@ -1,3 +1,4 @@
+# SafeVault Backend API - Secure secrets management
 from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
