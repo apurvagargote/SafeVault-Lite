@@ -15,7 +15,17 @@ Secrets management application with AWS Secrets Manager integration, JWT authent
                         │   PostgreSQL    │
                         └─────────────────┘
 ```
+## LogIn/SignUp page
+![Login](frontend/public/assets/login.png)
 
+## Dashboard
+![Dashboard](frontend/public/assets/homepage%20(2).png)
+
+## Analytics
+![Analytics](frontend/public/assets/analytics.png)
+
+## Syncing With AWS Secrets 
+![AWS Secrets](frontend/public/assets/aws%20secrets.png)
 ## 🔐 Features
 
 - **JWT Authentication** - Secure token-based sessions
@@ -44,6 +54,12 @@ Secrets management application with AWS Secrets Manager integration, JWT authent
 - **GitHub Pages** - Frontend deployment
 - **Kind Testing** - Kubernetes validation
 - **Prometheus** - Metrics collection
+
+## CICD Pipeline
+![CI/CD Pipeline](frontend/public/assets/cicd.png)
+
+## Email Alert
+![Email Alert](frontend/public/assets/email%20alert.png)
 
 ## 🏃♂️ Quick Start
 
@@ -161,6 +177,12 @@ Required repository secrets:
 - **Prometheus**: http://localhost:9090 - Metrics collection
 - **Grafana**: http://localhost:3001 (admin/admin) - Dashboards
 - Tracks: HTTP requests, auth events, AWS ops, business metrics
+
+## Prometheus Metrics
+![Prometheus Metrics](frontend/public/assets/prometheus.png)
+
+## Grafana Dashboard
+![Grafana Dashboard](frontend/public/assets/grafana.png)
 
 ## 🚀 Production Deployment
 
