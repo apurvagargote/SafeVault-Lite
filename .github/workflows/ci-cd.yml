@@ -74,7 +74,7 @@ jobs:
   deploy:
     needs: [build-backend, build-frontend]
     runs-on: ubuntu-latest
-    if: always() && secrets.KUBECONFIG != ''  # Only run when K8s cluster is configured
+    if: false  # Disabled until Kubernetes cluster is configured
     
     steps:
     - name: Checkout code
