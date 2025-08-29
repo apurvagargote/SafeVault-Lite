@@ -24,8 +24,10 @@ jobs:
         filters: |
           backend:
             - 'backend/**'
+            - '.github/workflows/**'
           frontend:
             - 'frontend/**'
+            - '.github/workflows/**'
 
   build-backend:
     needs: changes
@@ -72,7 +74,7 @@ jobs:
   deploy:
     needs: [build-backend, build-frontend]
     runs-on: ubuntu-latest
-    if: false  # Disabled until Kubernetes cluster is configured
+    if: always() && false  # Disabled until Kubernetes cluster is configured
     
     steps:
     - name: Checkout code
