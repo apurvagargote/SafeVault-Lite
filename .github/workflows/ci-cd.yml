@@ -90,7 +90,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') && secrets.KUBECONFIG != ''
+    if: false  # Disabled until Kubernetes cluster is configured
     
     steps:
     - name: Checkout code
