@@ -11,62 +11,34 @@ env:
   FRONTEND_IMAGE: apurva1025/safevault-frontend
 
 jobs:
-  test:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v2
+      id: changes
       with:
-        python-version: '3.9'
-    
-    - name: Install backend dependencies
-      run: |
-        cd backend
-        pip install -r requirements.txt
-    
-    - name: Run backend tests
-      run: |
-        cd backend
-        python -m pytest tests/ -v || echo "No tests found, skipping"
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm install
-    
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
+        filters: |
+          backend:
+            - 'backend/**'
+          frontend:
+            - 'frontend/**'
 
-  build-and-push:
-    needs: test
+  build-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
+    - uses: actions/checkout@v4
+    - uses: docker/setup-buildx-action@v3
+    - uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    - name: Build and push backend image
-      uses: docker/build-push-action@v5
+    - uses: docker/build-push-action@v5
       with:
         context: ./backend
         push: true
@@ -75,9 +47,19 @@ jobs:
           ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v5
+
+  build-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: docker/setup-buildx-action@v3
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - uses: docker/build-push-action@v5
       with:
         context: ./frontend
         push: true
@@ -88,7 +70,7 @@ jobs:
         cache-to: type=gha,mode=max
 
   deploy:
-    needs: build-and-push
+    needs: [build-backend, build-frontend]
     runs-on: ubuntu-latest
     if: false  # Disabled until Kubernetes cluster is configured
     
