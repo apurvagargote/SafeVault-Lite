@@ -2,11 +2,6 @@
 
 Secrets management application with AWS Secrets Manager integration, JWT authentication, and automated CI/CD.
 
-## 🚀 Demo
-
-- **Live**: [https://apurvagargote.github.io/SafeVault-Lite/](https://apurvagargote.github.io/SafeVault-Lite/)
-- **Docker**: `apurva1025/safevault-backend:latest` | `apurva1025/safevault-frontend:latest`
-
 ## 🏗️ Architecture
 
 ```
@@ -231,7 +226,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Repository**: [https://github.com/apurvagargote/SafeVault-Lite](https://github.com/apurvagargote/SafeVault-Lite)
 - **Docker Hub**: [https://hub.docker.com/u/apurva1025](https://hub.docker.com/u/apurva1025)
-- **Live Demo**: [https://apurvagargote.github.io/SafeVault-Lite/](https://apurvagargote.github.io/SafeVault-Lite/)
 
 ---
 
