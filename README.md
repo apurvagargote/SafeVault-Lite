@@ -96,18 +96,30 @@ SafeVault-Lite/
 │   ├── auth.py             # JWT authentication
 │   ├── database.py         # Database models
 │   ├── metrics.py          # Prometheus metrics
+│   ├── Dockerfile          # Backend container
 │   └── requirements.txt    # Python dependencies
 ├── frontend/               # React application
 │   ├── src/
 │   │   ├── App.js         # Main component
-│   │   └── Login.js       # Authentication
+│   │   ├── Login.js       # Authentication
+│   │   └── *.css          # Styling files
+│   ├── public/
+│   │   └── index.html     # HTML template
+│   ├── Dockerfile         # Frontend container
 │   └── package.json       # Node dependencies
 ├── k8s/                   # Kubernetes manifests
 │   ├── deploy-all.yaml    # Complete deployment
-│   └── monitoring/        # Prometheus & Grafana
+│   ├── grafana-deployment.yaml
+│   ├── prometheus-deployment.yaml
+│   └── monitoring-rbac.yaml
+├── monitoring/            # Monitoring configuration
+│   ├── grafana/          # Grafana dashboards
+│   └── prometheus.yml    # Prometheus config
 ├── .github/workflows/     # CI/CD pipeline
 │   └── ci-cd.yml         # GitHub Actions workflow
-└── docker-compose.yml    # Local development
+├── docker-compose.yml     # Local development
+├── docker-compose.monitoring.yml  # Monitoring stack
+└── .env.example          # Environment template
 ```
 
 ## 🔧 Configuration
@@ -170,8 +182,8 @@ Access monitoring dashboards:
 
 ### AWS EKS Deployment
 1. Create EKS cluster
-2. Update `k8s/aws-secret.yaml` with real AWS credentials
-3. Deploy: `kubectl apply -f k8s/`
+2. Create AWS credentials secret: `kubectl create secret generic aws-credentials --from-literal=access-key-id=your-key --from-literal=secret-access-key=your-secret`
+3. Deploy: `kubectl apply -f k8s/deploy-all.yaml`
 
 ### Manual Docker Deployment
 ```bash
