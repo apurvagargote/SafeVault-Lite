@@ -73,7 +73,7 @@ jobs:
 
   deploy-pages:
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' && github.ref == 'refs/heads/main'
+    if: needs.changes.outputs.frontend == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     runs-on: ubuntu-latest
     permissions:
       contents: read
