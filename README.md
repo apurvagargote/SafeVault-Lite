@@ -1,13 +1,11 @@
 # SafeVault Lite
 
-A comprehensive secrets management application with AWS Secrets Manager integration, featuring secure authentication, real-time monitoring, and complete CI/CD automation.
+Secrets management application with AWS Secrets Manager integration, JWT authentication, and automated CI/CD.
 
-## 🚀 Live Demo
+## 🚀 Demo
 
-- **Frontend**: [https://apurvagargote.github.io/SafeVault-Lite/](https://apurvagargote.github.io/SafeVault-Lite/)
-- **Docker Images**: 
-  - Backend: `apurva1025/safevault-backend:latest`
-  - Frontend: `apurva1025/safevault-frontend:latest`
+- **Live**: [https://apurvagargote.github.io/SafeVault-Lite/](https://apurvagargote.github.io/SafeVault-Lite/)
+- **Docker**: `apurva1025/safevault-backend:latest` | `apurva1025/safevault-frontend:latest`
 
 ## 🏗️ Architecture
 
@@ -23,25 +21,15 @@ A comprehensive secrets management application with AWS Secrets Manager integrat
                         └─────────────────┘
 ```
 
-## 🔐 Security Features
+## 🔐 Features
 
-### Authentication & Authorization
-- **JWT-based Authentication** - Secure token-based user sessions
-- **Password Hashing** - Bcrypt encryption for user passwords
-- **Role-based Access Control** - User and admin roles with different permissions
-- **Session Management** - Configurable token expiration and refresh
-
-### Security Monitoring
-- **Failed Login Detection** - Automatic alerts after multiple failed attempts
-- **Security Event Logging** - Comprehensive audit trail of all user actions
-- **Email Alerts** - Real-time notifications for suspicious activities
-- **IP Address Tracking** - Monitor access patterns and locations
-
-### Data Protection
-- **Hybrid Storage** - Local database + AWS Secrets Manager encryption
-- **Category-based Organization** - Organize secrets by type (API keys, passwords, etc.)
-- **Automatic Sync** - Seamless synchronization between local and cloud storage
-- **Fallback Mechanism** - Continues working even if AWS is unavailable
+- **JWT Authentication** - Secure token-based sessions
+- **Password Hashing** - Bcrypt encryption
+- **Failed Login Alerts** - Email notifications for suspicious activity
+- **Audit Logging** - Complete security event trail
+- **AWS Integration** - Hybrid local + cloud storage
+- **Category Organization** - Group secrets by type
+- **Offline Fallback** - Works without AWS connection
 
 ## 🛠️ Tech Stack
 
@@ -54,22 +42,13 @@ A comprehensive secrets management application with AWS Secrets Manager integrat
 - **Orchestration**: Kubernetes, Kind (testing)
 - **CI/CD**: GitHub Actions with automated builds and deployments
 
-## 🚦 CI/CD Pipeline
+## 🚦 CI/CD
 
-Advanced automation pipeline with intelligent path-based builds:
-
-### Pipeline Features
-1. **Smart Change Detection** - Only builds components that changed
-2. **Parallel Builds** - Backend and frontend build simultaneously
-3. **Docker Registry** - Automatic push to Docker Hub with SHA tags
-4. **GitHub Pages Deployment** - Frontend automatically deployed for demos
-5. **Kubernetes Testing** - Validates deployments in Kind cluster
-6. **Monitoring Integration** - Prometheus metrics collection
-
-### Pipeline Triggers
-- **Push to `main`/`dev`** - Full pipeline execution
-- **Pull Requests** - Build validation and testing
-- **Path-based optimization** - Only affected components rebuild
+- **Smart Builds** - Only builds changed components
+- **Docker Hub** - Automatic image push with SHA tags
+- **GitHub Pages** - Frontend deployment
+- **Kind Testing** - Kubernetes validation
+- **Prometheus** - Metrics collection
 
 ## 🏃♂️ Quick Start
 
@@ -180,52 +159,13 @@ Required repository secrets:
 - `DOCKER_USERNAME` - Docker Hub username
 - `DOCKER_PASSWORD` - Docker Hub access token
 
-## 🎯 Core Features
 
-### User Management
-- ✅ **User Registration** - Secure account creation with email validation
-- ✅ **JWT Authentication** - Token-based secure sessions
-- ✅ **Password Management** - Secure password changes with validation
-- ✅ **Role-based Access** - User and admin permission levels
 
-### Secret Management
-- ✅ **Create Secrets** - Store sensitive data securely
-- ✅ **Category Organization** - Group secrets by type (API keys, passwords, etc.)
-- ✅ **AWS Integration** - Automatic sync with AWS Secrets Manager
-- ✅ **Local Fallback** - Works offline with local database
-- ✅ **Search & Filter** - Easy secret discovery and management
+## 📊 Monitoring
 
-### Security & Monitoring
-- ✅ **Security Logging** - Complete audit trail of all actions
-- ✅ **Failed Login Alerts** - Email notifications for suspicious activity
-- ✅ **Real-time Metrics** - Prometheus monitoring with Grafana dashboards
-- ✅ **IP Tracking** - Monitor access patterns and locations
-- ✅ **Session Management** - Secure token handling and expiration
-
-### DevOps & Deployment
-- ✅ **Docker Containerization** - Complete containerized deployment
-- ✅ **Kubernetes Ready** - Production-ready K8s manifests
-- ✅ **CI/CD Automation** - Automated builds, tests, and deployments
-- ✅ **Multi-environment** - Development, staging, and production configs
-
-## 📊 Monitoring & Analytics
-
-### Prometheus Metrics
-- HTTP request metrics (response times, status codes)
-- Authentication events (successful/failed logins)
-- AWS operations (create/read/delete secrets)
-- Database connections and query performance
-- Business metrics (user count, secrets count)
-
-### Grafana Dashboards
-- **System Overview** - Application health and performance
-- **Security Dashboard** - Authentication and access patterns
-- **Business Metrics** - User activity and secret usage
-- **Infrastructure** - Container and database metrics
-
-Access monitoring at:
-- **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3001 (admin/admin)
+- **Prometheus**: http://localhost:9090 - Metrics collection
+- **Grafana**: http://localhost:3001 (admin/admin) - Dashboards
+- Tracks: HTTP requests, auth events, AWS ops, business metrics
 
 ## 🚀 Production Deployment
 
@@ -262,25 +202,11 @@ kubectl get pods
 kubectl get services
 ```
 
-## 🔒 Security Best Practices
+## 🔒 Security
 
-### Implemented Security Measures
-- **Password Hashing** - Bcrypt with salt for secure password storage
-- **JWT Tokens** - Secure, stateless authentication with expiration
-- **Input Validation** - Comprehensive request validation and sanitization
-- **SQL Injection Prevention** - SQLAlchemy ORM with parameterized queries
-- **CORS Configuration** - Controlled cross-origin resource sharing
-- **Rate Limiting** - Protection against brute force attacks
-- **Security Headers** - Comprehensive HTTP security headers
-- **Audit Logging** - Complete trail of all security events
+**Implemented**: Bcrypt hashing, JWT tokens, input validation, SQL injection prevention, CORS, audit logging
 
-### Recommended Production Setup
-- Use HTTPS with valid SSL certificates
-- Configure firewall rules for port access
-- Set up database backups and encryption
-- Enable AWS CloudTrail for API auditing
-- Implement network segmentation
-- Regular security updates and patches
+**Production**: Use HTTPS, configure firewalls, enable AWS CloudTrail, regular updates
 
 ## 🤝 Contributing
 
