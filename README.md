@@ -1,6 +1,6 @@
 # SafeVault Lite
 
-A secure secrets management application with AWS Secrets Manager integration, built with FastAPI backend, React frontend, and complete CI/CD pipeline.
+A comprehensive secrets management application with AWS Secrets Manager integration, featuring secure authentication, real-time monitoring, and complete CI/CD automation.
 
 ## 🚀 Live Demo
 
@@ -18,73 +18,101 @@ A secure secrets management application with AWS Secrets Manager integration, bu
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          │              ┌─────────────────┐              │
-         └──────────────│   PostgreSQL    │──────────────┘
-                        │   (Database)    │
+         └──────────────│   SQLite/       │──────────────┘
+                        │   PostgreSQL    │
                         └─────────────────┘
 ```
+
+## 🔐 Security Features
+
+### Authentication & Authorization
+- **JWT-based Authentication** - Secure token-based user sessions
+- **Password Hashing** - Bcrypt encryption for user passwords
+- **Role-based Access Control** - User and admin roles with different permissions
+- **Session Management** - Configurable token expiration and refresh
+
+### Security Monitoring
+- **Failed Login Detection** - Automatic alerts after multiple failed attempts
+- **Security Event Logging** - Comprehensive audit trail of all user actions
+- **Email Alerts** - Real-time notifications for suspicious activities
+- **IP Address Tracking** - Monitor access patterns and locations
+
+### Data Protection
+- **Hybrid Storage** - Local database + AWS Secrets Manager encryption
+- **Category-based Organization** - Organize secrets by type (API keys, passwords, etc.)
+- **Automatic Sync** - Seamless synchronization between local and cloud storage
+- **Fallback Mechanism** - Continues working even if AWS is unavailable
 
 ## 🛠️ Tech Stack
 
 - **Backend**: FastAPI, Python 3.11, SQLAlchemy, JWT Authentication
-- **Frontend**: React 18, Axios, React Router
-- **Database**: PostgreSQL (production), SQLite (development)
-- **Cloud**: AWS Secrets Manager
-- **Monitoring**: Prometheus, Grafana
+- **Frontend**: React 18, Axios, React Router, Responsive CSS
+- **Database**: SQLite (development), PostgreSQL (production)
+- **Cloud**: AWS Secrets Manager, EC2 deployment
+- **Monitoring**: Prometheus metrics, Grafana dashboards
 - **Containerization**: Docker, Docker Compose
-- **Orchestration**: Kubernetes, Kind
-- **CI/CD**: GitHub Actions
-- **Deployment**: GitHub Pages, Docker Hub
+- **Orchestration**: Kubernetes, Kind (testing)
+- **CI/CD**: GitHub Actions with automated builds and deployments
 
 ## 🚦 CI/CD Pipeline
 
-The project includes a comprehensive CI/CD pipeline that automatically:
+Advanced automation pipeline with intelligent path-based builds:
 
-1. **Detects Changes** - Only builds what changed (backend/frontend)
-2. **Builds Docker Images** - Pushes to Docker Hub with commit SHA tags
-3. **Deploys to GitHub Pages** - Frontend available for demo
-4. **Tests Kubernetes Deployment** - Validates in Kind cluster
-5. **Monitors with Prometheus** - Collects metrics and health checks
+### Pipeline Features
+1. **Smart Change Detection** - Only builds components that changed
+2. **Parallel Builds** - Backend and frontend build simultaneously
+3. **Docker Registry** - Automatic push to Docker Hub with SHA tags
+4. **GitHub Pages Deployment** - Frontend automatically deployed for demos
+5. **Kubernetes Testing** - Validates deployments in Kind cluster
+6. **Monitoring Integration** - Prometheus metrics collection
 
 ### Pipeline Triggers
 - **Push to `main`/`dev`** - Full pipeline execution
-- **Pull Requests** - Build and test validation
-- **Path-based builds** - Only affected components rebuild
+- **Pull Requests** - Build validation and testing
+- **Path-based optimization** - Only affected components rebuild
 
-## 🏃‍♂️ Quick Start
+## 🏃♂️ Quick Start
 
 ### Option 1: Docker Compose (Recommended)
 ```bash
 git clone https://github.com/apurvagargote/SafeVault-Lite.git
 cd SafeVault-Lite
-docker-compose up
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your AWS credentials
+
+# Start all services
+docker-compose up -d
 ```
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
-- Grafana: http://localhost:3001
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **Grafana Dashboard**: http://localhost:3001 (admin/admin)
 
 ### Option 2: Local Development
 ```bash
-# Backend
+# Backend setup
 cd backend
 pip install -r requirements.txt
-uvicorn app:app --reload
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
 
-# Frontend (new terminal)
+# Frontend setup (new terminal)
 cd frontend
 npm install
 npm start
 ```
 
-### Option 3: Kubernetes with Kind
+### Option 3: Kubernetes Deployment
 ```bash
-# Create cluster
+# Create Kind cluster
 kind create cluster --name safevault
 
-# Deploy
+# Deploy application
 kubectl apply -f k8s/deploy-all.yaml
 
 # Access via port-forward
 kubectl port-forward service/safevault-frontend-service 3000:80
+kubectl port-forward service/safevault-backend-service 8000:8000
 ```
 
 ## 📁 Project Structure
@@ -92,111 +120,167 @@ kubectl port-forward service/safevault-frontend-service 3000:80
 ```
 SafeVault-Lite/
 ├── backend/                 # FastAPI application
-│   ├── app.py              # Main application
-│   ├── auth.py             # JWT authentication
-│   ├── database.py         # Database models
-│   ├── metrics.py          # Prometheus metrics
-│   ├── Dockerfile          # Backend container
+│   ├── app.py              # Main application with all endpoints
+│   ├── auth.py             # JWT authentication & password hashing
+│   ├── database.py         # SQLAlchemy models (User, Secret, SecurityLog)
+│   ├── metrics.py          # Prometheus metrics collection
+│   ├── Dockerfile          # Backend container configuration
 │   └── requirements.txt    # Python dependencies
 ├── frontend/               # React application
 │   ├── src/
-│   │   ├── App.js         # Main component
-│   │   ├── Login.js       # Authentication
-│   │   └── *.css          # Styling files
+│   │   ├── App.js         # Main component with routing
+│   │   ├── Login.js       # Authentication interface
+│   │   ├── Signup.js      # User registration
+│   │   └── *.css          # Responsive styling
 │   ├── public/
 │   │   └── index.html     # HTML template
-│   ├── Dockerfile         # Frontend container
-│   └── package.json       # Node dependencies
+│   ├── Dockerfile         # Frontend container configuration
+│   └── package.json       # Node.js dependencies
 ├── k8s/                   # Kubernetes manifests
-│   ├── deploy-all.yaml    # Complete deployment
-│   ├── grafana-deployment.yaml
-│   ├── prometheus-deployment.yaml
-│   └── monitoring-rbac.yaml
+│   ├── deploy-all.yaml    # Complete application deployment
+│   ├── grafana-deployment.yaml    # Monitoring dashboard
+│   ├── prometheus-deployment.yaml # Metrics collection
+│   └── monitoring-rbac.yaml      # Monitoring permissions
 ├── monitoring/            # Monitoring configuration
-│   ├── grafana/          # Grafana dashboards
-│   └── prometheus.yml    # Prometheus config
-├── .github/workflows/     # CI/CD pipeline
-│   └── ci-cd.yml         # GitHub Actions workflow
-├── docker-compose.yml     # Local development
+│   ├── grafana/          # Dashboard configurations
+│   └── prometheus.yml    # Metrics scraping config
+├── .github/workflows/     # CI/CD automation
+│   └── ci-cd.yml         # GitHub Actions pipeline
+├── docker-compose.yml     # Local development environment
 ├── docker-compose.monitoring.yml  # Monitoring stack
-└── .env.example          # Environment template
+└── .env.example          # Environment variables template
 ```
 
 ## 🔧 Configuration
 
 ### Environment Variables
-Copy `.env.example` to `.env` and configure:
+Create `.env` file from template:
 
 ```bash
-# Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/safevault
+# Security Configuration
+SECRET_KEY=your-super-secure-jwt-secret-key
+DATABASE_URL=sqlite:///./safevault.db
 
-# Security
-SECRET_KEY=your-jwt-secret-key
+# AWS Secrets Manager
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+AWS_REGION=eu-west-1
 
-# AWS
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_REGION=us-east-1
-
-# Email (Gmail SMTP)
+# Email Alerts (Gmail SMTP)
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
+SMTP_PASSWORD=your-gmail-app-password
+FROM_EMAIL=noreply@safevault.com
 ```
 
 ### GitHub Secrets (for CI/CD)
-Add these secrets to your GitHub repository:
+Required repository secrets:
 
 - `DOCKER_USERNAME` - Docker Hub username
 - `DOCKER_PASSWORD` - Docker Hub access token
 
-## 🎯 Features
+## 🎯 Core Features
 
-- ✅ **Secure Secret Management** - Store secrets in AWS Secrets Manager
-- ✅ **JWT Authentication** - Secure user authentication
-- ✅ **Category-based Organization** - Organize secrets by categories
-- ✅ **Real-time Monitoring** - Prometheus metrics & Grafana dashboards
-- ✅ **Responsive UI** - Mobile-friendly React interface
-- ✅ **Docker Ready** - Complete containerization
-- ✅ **Kubernetes Native** - Production-ready K8s manifests
-- ✅ **CI/CD Pipeline** - Automated build, test, and deploy
+### User Management
+- ✅ **User Registration** - Secure account creation with email validation
+- ✅ **JWT Authentication** - Token-based secure sessions
+- ✅ **Password Management** - Secure password changes with validation
+- ✅ **Role-based Access** - User and admin permission levels
 
-## 📊 Monitoring
+### Secret Management
+- ✅ **Create Secrets** - Store sensitive data securely
+- ✅ **Category Organization** - Group secrets by type (API keys, passwords, etc.)
+- ✅ **AWS Integration** - Automatic sync with AWS Secrets Manager
+- ✅ **Local Fallback** - Works offline with local database
+- ✅ **Search & Filter** - Easy secret discovery and management
 
-Access monitoring dashboards:
-- **Prometheus**: http://localhost:9090 (metrics collection)
-- **Grafana**: http://localhost:3001 (visualization)
-  - Username: `admin`
-  - Password: `admin`
+### Security & Monitoring
+- ✅ **Security Logging** - Complete audit trail of all actions
+- ✅ **Failed Login Alerts** - Email notifications for suspicious activity
+- ✅ **Real-time Metrics** - Prometheus monitoring with Grafana dashboards
+- ✅ **IP Tracking** - Monitor access patterns and locations
+- ✅ **Session Management** - Secure token handling and expiration
 
-### Available Metrics
-- HTTP request metrics
-- Authentication events
-- AWS operations
-- Database connections
-- Business metrics (secrets count, user activity)
+### DevOps & Deployment
+- ✅ **Docker Containerization** - Complete containerized deployment
+- ✅ **Kubernetes Ready** - Production-ready K8s manifests
+- ✅ **CI/CD Automation** - Automated builds, tests, and deployments
+- ✅ **Multi-environment** - Development, staging, and production configs
+
+## 📊 Monitoring & Analytics
+
+### Prometheus Metrics
+- HTTP request metrics (response times, status codes)
+- Authentication events (successful/failed logins)
+- AWS operations (create/read/delete secrets)
+- Database connections and query performance
+- Business metrics (user count, secrets count)
+
+### Grafana Dashboards
+- **System Overview** - Application health and performance
+- **Security Dashboard** - Authentication and access patterns
+- **Business Metrics** - User activity and secret usage
+- **Infrastructure** - Container and database metrics
+
+Access monitoring at:
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3001 (admin/admin)
 
 ## 🚀 Production Deployment
 
-### AWS EKS Deployment
-1. Create EKS cluster
-2. Create AWS credentials secret: `kubectl create secret generic aws-credentials --from-literal=access-key-id=your-key --from-literal=secret-access-key=your-secret`
-3. Deploy: `kubectl apply -f k8s/deploy-all.yaml`
-
-### Manual Docker Deployment
+### AWS EC2 Deployment
 ```bash
-# Pull latest images
-docker pull apurva1025/safevault-backend:latest
-docker pull apurva1025/safevault-frontend:latest
+# On your EC2 instance
+git clone https://github.com/apurvagargote/SafeVault-Lite.git
+cd SafeVault-Lite
 
-# Run with custom configuration
-docker run -d -p 8000:8000 \
-  -e DATABASE_URL=your-db-url \
-  -e AWS_ACCESS_KEY_ID=your-key \
-  apurva1025/safevault-backend:latest
+# Configure environment
+cp .env.example .env
+# Edit .env with production values
+
+# Deploy with Docker Compose
+docker-compose up -d
+
+# Access application
+# Frontend: http://your-ec2-ip:3000
+# Backend: http://your-ec2-ip:8000
 ```
+
+### Kubernetes Production
+```bash
+# Create AWS credentials secret
+kubectl create secret generic aws-credentials \
+  --from-literal=access-key-id=your-key \
+  --from-literal=secret-access-key=your-secret
+
+# Deploy application
+kubectl apply -f k8s/deploy-all.yaml
+
+# Verify deployment
+kubectl get pods
+kubectl get services
+```
+
+## 🔒 Security Best Practices
+
+### Implemented Security Measures
+- **Password Hashing** - Bcrypt with salt for secure password storage
+- **JWT Tokens** - Secure, stateless authentication with expiration
+- **Input Validation** - Comprehensive request validation and sanitization
+- **SQL Injection Prevention** - SQLAlchemy ORM with parameterized queries
+- **CORS Configuration** - Controlled cross-origin resource sharing
+- **Rate Limiting** - Protection against brute force attacks
+- **Security Headers** - Comprehensive HTTP security headers
+- **Audit Logging** - Complete trail of all security events
+
+### Recommended Production Setup
+- Use HTTPS with valid SSL certificates
+- Configure firewall rules for port access
+- Set up database backups and encryption
+- Enable AWS CloudTrail for API auditing
+- Implement network segmentation
+- Regular security updates and patches
 
 ## 🤝 Contributing
 
@@ -205,6 +289,13 @@ docker run -d -p 8000:8000 \
 3. Commit changes: `git commit -m 'Add amazing feature'`
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open Pull Request
+
+### Development Guidelines
+- Follow PEP 8 for Python code
+- Use ESLint for JavaScript code
+- Write comprehensive tests
+- Update documentation for new features
+- Ensure security best practices
 
 ## 📝 License
 
