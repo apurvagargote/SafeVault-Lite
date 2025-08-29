@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: safevault-backend
+  labels:
+    app: safevault-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: safevault-backend
+  template:
+    metadata:
+      labels:
+        app: safevault-backend
+    spec:
+      containers:
+      - name: backend
+        image: apurva1025/safevault-backend:optimized
+        imagePullPolicy: Always
+        env:
+        - name: REACT_APP_API_URL
+          value: "http://safevault-backend-service:8000"
+        - name: DATABASE_URL
+          value: "sqlite:///./data/safevault.db"
+        - name: SECRET_KEY
+          value: "super-secret-key"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: secret-access-key
+        - name: AWS_REGION
+          value: "eu-west-1"
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: database-storage
+          mountPath: /app/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: database-storage
+        persistentVolumeClaim:
+          claimName: safevault-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: safevault-backend-service
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+spec:
+  selector:
+    app: safevault-backend
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: safevault-frontend
+  labels:
+    app: safevault-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: safevault-frontend
+  template:
+    metadata:
+      labels:
+        app: safevault-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: apurva1025/safevault-frontend:fixed
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: safevault-frontend-service
+spec:
+  selector:
+    app: safevault-frontend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: safevault-secrets
+type: Opaque
+stringData:
+  database-url: "sqlite:///./safevault.db"
+  secret-key: "super-secret-key"
