@@ -2,7 +2,7 @@ name: SafeVault CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 
@@ -11,62 +11,36 @@ env:
   FRONTEND_IMAGE: apurva1025/safevault-frontend
 
 jobs:
-  test:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v2
+      id: changes
       with:
-        python-version: '3.9'
-    
-    - name: Install backend dependencies
-      run: |
-        cd backend
-        pip install -r requirements.txt
-    
-    - name: Run backend tests
-      run: |
-        cd backend
-        python -m pytest tests/ -v || echo "No tests found, skipping"
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm install
-    
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
+        filters: |
+          backend:
+            - 'backend/**'
+            - '.github/workflows/**'
+          frontend:
+            - 'frontend/**'
+            - '.github/workflows/**'
 
-  build-and-push:
-    needs: test
+  build-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
+    - uses: actions/checkout@v4
+    - uses: docker/setup-buildx-action@v3
+    - uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    - name: Build and push backend image
-      uses: docker/build-push-action@v5
+    - uses: docker/build-push-action@v5
       with:
         context: ./backend
         push: true
@@ -75,9 +49,19 @@ jobs:
           ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v5
+
+  build-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: docker/setup-buildx-action@v3
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - uses: docker/build-push-action@v5
       with:
         context: ./frontend
         push: true
@@ -87,38 +71,87 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-  deploy:
-    needs: build-and-push
+  deploy-pages:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    - name: Install and build
+      run: |
+        cd frontend
+        npm install
+        npm run build
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './frontend/build'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+  deploy:
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    if: always()  # Run deploy job
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
+    - name: Create Kind cluster
+      uses: helm/kind-action@v1
       with:
-        version: 'v1.28.0'
+        cluster_name: safevault
     
-    - name: Configure kubectl
-      run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-        chmod 600 ~/.kube/config
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
     
-    - name: Update deployment images
+    - name: Pull and load Docker images to Kind
       run: |
+        docker pull ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+        docker pull ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+        kind load docker-image ${{ env.BACKEND_IMAGE }}:${{ github.sha }} --name safevault
+        kind load docker-image ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} --name safevault
+    
+    - name: Create AWS credentials secret
+      run: |
+        kubectl create secret generic aws-credentials \
+          --from-literal=access-key-id=dummy \
+          --from-literal=secret-access-key=dummy
+    
+    - name: Deploy to Kind cluster
+      run: |
+        kubectl apply -f k8s/deploy-all.yaml
         kubectl set image deployment/safevault-backend backend=${{ env.BACKEND_IMAGE }}:${{ github.sha }}
         kubectl set image deployment/safevault-frontend frontend=${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
     
+    - name: Debug deployment
+      run: |
+        kubectl get pods
+        kubectl describe pods
+        kubectl logs -l app=safevault-backend --tail=50 || true
+    
     - name: Wait for rollout
       run: |
-        kubectl rollout status deployment/safevault-backend --timeout=300s
-        kubectl rollout status deployment/safevault-frontend --timeout=300s
+        kubectl rollout status deployment/safevault-backend --timeout=180s
+        kubectl rollout status deployment/safevault-frontend --timeout=180s
     
     - name: Verify deployment
       run: |
-        kubectl get pods -l app=safevault-backend
-        kubectl get pods -l app=safevault-frontend
+        kubectl get pods
         kubectl get services

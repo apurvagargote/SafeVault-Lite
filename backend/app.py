@@ -12,6 +12,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
+import asyncio
 
 # Load environment variables
 load_dotenv()
@@ -62,7 +63,6 @@ create_tables()
 # Background task to update business metrics
 @app.on_event("startup")
 async def startup_event():
-    import asyncio
     asyncio.create_task(update_business_metrics())
 
 async def update_business_metrics():
