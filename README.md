@@ -15,9 +15,17 @@ Secrets management application with AWS Secrets Manager integration, JWT authent
                         │   PostgreSQL    │
                         └─────────────────┘
 ```
-## LOG IN PAGE
+## LogIn/SignUp page
 ![Login](frontend/public/assets/login.png)
 
+## Home Page
+![Homepage](frontend/public/assets/homepage(2).png)
+
+## Analytics
+![Analytics](frontend/public/assets/analytics.png)
+
+## Syncing With AWS Secrets 
+![AWS Secrets](frontend/public/assets/aws%20secrets.png)
 ## 🔐 Features
 
 - **JWT Authentication** - Secure token-based sessions
