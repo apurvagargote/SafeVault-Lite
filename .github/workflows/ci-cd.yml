@@ -77,25 +77,21 @@ jobs:
     if: always()  # Run deploy job
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
+    - name: Create Kind cluster
+      uses: helm/kind-action@v1
       with:
-        version: 'v1.28.0'
+        cluster_name: safevault
     
-    - name: Configure kubectl
+    - name: Load Docker images to Kind
       run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-        chmod 600 ~/.kube/config
+        kind load docker-image ${{ env.BACKEND_IMAGE }}:${{ github.sha }} --name safevault
+        kind load docker-image ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} --name safevault
     
-    - name: Test kubectl connection
-      run: kubectl cluster-info
-    
-    - name: Update deployment images
+    - name: Deploy to Kind cluster
       run: |
+        kubectl apply -f k8s/deploy-all.yaml
         kubectl set image deployment/safevault-backend backend=${{ env.BACKEND_IMAGE }}:${{ github.sha }}
         kubectl set image deployment/safevault-frontend frontend=${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
     
@@ -106,6 +102,5 @@ jobs:
     
     - name: Verify deployment
       run: |
-        kubectl get pods -l app=safevault-backend
-        kubectl get pods -l app=safevault-frontend
+        kubectl get pods
         kubectl get services
