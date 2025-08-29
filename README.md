@@ -15,6 +15,7 @@ Secrets management application with AWS Secrets Manager integration, JWT authent
                         │   PostgreSQL    │
                         └─────────────────┘
 ```
+![Login](frontend/public/assets/login.png)
 
 ## 🔐 Features
 
